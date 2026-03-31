@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-// ── 1. Inject the custom setting HTML into the Advanced tab of the field editor ──
+// Inject the custom setting HTML into the Advanced tab of the field editor
 
 add_action( 'gform_field_advanced_settings', function ( $position, $form_id ) {
     // Position 25 renders just below the "Custom CSS Class" setting.
@@ -32,7 +32,7 @@ add_action( 'gform_field_advanced_settings', function ( $position, $form_id ) {
     <?php
 }, 10, 2 );
 
-// ── 2. Register which standard GF field types should show this setting ──
+// register which standard GF field types should show this setting
 
 add_filter( 'gform_tooltips', function ( $tooltips ) {
     $tooltips['gftl_tooltip_text'] = '<h6>' . esc_html__( 'Tooltip Text', 'gf-tooltip-lite' ) . '</h6>'
@@ -40,17 +40,17 @@ add_filter( 'gform_tooltips', function ( $tooltips ) {
     return $tooltips;
 } );
 
-// ── 3. Tell the GF editor JS to bind the input to our custom property ──
+// tell the Gravity Forms editor JS to bind the input to our custom property ──
 
 add_action( 'gform_editor_js', function () {
     ?>
     <script>
-    // Show our setting for every field type.
+    // show our setting for every field type
     jQuery(document).on('gform_load_field_settings', function(event, field) {
         jQuery('#gftl_tooltip_text').val(field.gftlTooltip || '');
     });
 
-    // Register the setting so GF copies it across all field types.
+    // register the setting so GF copies it across all field types
     fieldSettings['text']            += ', .gftl_tooltip_setting';
     fieldSettings['textarea']        += ', .gftl_tooltip_setting';
     fieldSettings['select']          += ', .gftl_tooltip_setting';
