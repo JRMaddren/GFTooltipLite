@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: GF Tooltip Lite
- * Plugin URI:  https://github.com/yourname/gf-tooltip-lite
+ * Plugin URI:  https://github.com/JRMaddren/GFTooltipLite.git
  * Description: Adds hover tooltips to Gravity Forms field labels. Configure per-field inside the form editor.
  * Version:     1.0.0
  * Author:      Jesse M
