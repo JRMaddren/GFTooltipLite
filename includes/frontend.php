@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-// ── 1. Enqueue assets only on pages that contain a Gravity Form ──
+// enqueue assets only on pages that contain a Gravity Form 
 
 add_action( 'wp_enqueue_scripts', function () {
     wp_register_style(
@@ -26,13 +26,13 @@ add_action( 'wp_enqueue_scripts', function () {
     );
 } );
 
-// GF fires this action when it outputs a form — safe moment to enqueue.
+// GF fires this action when it outputs a form — safe moment to enqueue
 add_action( 'gform_enqueue_scripts', function () {
     wp_enqueue_style( 'gf-tooltip-lite' );
     wp_enqueue_script( 'gf-tooltip-lite' );
 } );
 
-// ── 2. Filter field labels to append the tooltip icon ──
+// Filter field labels to append the tooltip icon
 
 add_filter( 'gform_field_content', function ( $field_content, $field ) {
     $tooltip_text = isset( $field->gftlTooltip ) ? trim( $field->gftlTooltip ) : '';
@@ -50,7 +50,7 @@ add_filter( 'gform_field_content', function ( $field_content, $field ) {
         esc_html( $tooltip_text )
     );
 
-    // Insert the icon right after the closing </label> tag of the field label.
+    // insert the icon right after the closing </label> tag of the field label\
     $field_content = preg_replace(
         '/(<label[^>]*class="[^"]*gfield_label[^"]*"[^>]*>)(.*?)(<\/label>)/s',
         '$1$2$3' . $icon,
