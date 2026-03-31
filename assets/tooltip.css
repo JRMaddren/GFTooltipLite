@@ -1,4 +1,4 @@
-/* ── GF Tooltip Lite ─────────────────────────────────────────────────── */
+/* GF Tooltip Lite */
 
 .gftl-tooltip-wrap {
     position: relative;
@@ -17,7 +17,7 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: #0073aa;   /* WP admin blue; override in your theme */
+    background: #0073aa;   /* override in your theme */
     color: #fff;
     font-size: 10px;
     font-weight: 700;
