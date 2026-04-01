@@ -1,8 +1,6 @@
 /**
  * GF Tooltip Lite — lightweight JS for accessibility.
- * Hover is handled entirely by CSS; this script adds:
- *  - keyboard (focus/blur) toggle
- *  - touch support (tap to toggle)
+ * hover is handled entirely by CSS
  */
 (function () {
     'use strict';
