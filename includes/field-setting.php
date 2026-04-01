@@ -8,69 +8,122 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-// Inject the custom setting HTML into the Advanced tab of the field editor
+// Whitelist the custom property so GF doesn't strip it on save
+
+add_filter( 'gform_field_type_pre_save_choices', function ( $field ) {
+    return $field;
+} );
+
+add_filter( 'gform_pre_update_form', function ( $form ) {
+    return $form;
+} );
+
+// Inject the custom setting HTML into the Advanced tab
 
 add_action( 'gform_field_advanced_settings', function ( $position, $form_id ) {
-    // Position 25 renders just below the "Custom CSS Class" setting.
-    if ( $position !== 25 ) {
+    if ( 25 !== $position ) {
         return;
     }
     ?>
     <li class="gftl_tooltip_setting field_setting">
-        <label for="gftl_tooltip_text">
+        <label for="gftl_tooltip_text" class="section_label">
             <?php esc_html_e( 'Tooltip Text', 'gf-tooltip-lite' ); ?>
-            <?php gform_tooltip( 'gftl_tooltip_text' ); ?>
         </label>
         <input
             type="text"
             id="gftl_tooltip_text"
             class="fieldwidth-3"
             placeholder="<?php esc_attr_e( 'Enter tooltip text…', 'gf-tooltip-lite' ); ?>"
-            onchange="SetFieldProperty('gftlTooltip', this.value);"
         />
+        <p class="description" style="font-size:11px;margin-top:4px;">
+            <?php esc_html_e( 'Supports HTML e.g. <strong>, <a href="">. Shown as a hover tooltip next to the field label.', 'gf-tooltip-lite' ); ?>
+        </p>
     </li>
     <?php
 }, 10, 2 );
 
-// register which standard GF field types should show this setting
-
-add_filter( 'gform_tooltips', function ( $tooltips ) {
-    $tooltips['gftl_tooltip_text'] = '<h6>' . esc_html__( 'Tooltip Text', 'gf-tooltip-lite' ) . '</h6>'
-        . esc_html__( 'Text shown in a hover tooltip next to the field label.', 'gf-tooltip-lite' );
-    return $tooltips;
-} );
-
-// tell the Gravity Forms editor JS to bind the input to our custom property ──
+// Editor JS: register setting, sync property, and update preview live
 
 add_action( 'gform_editor_js', function () {
     ?>
-    <script>
-    // show our setting for every field type
-    jQuery(document).on('gform_load_field_settings', function(event, field) {
-        jQuery('#gftl_tooltip_text').val(field.gftlTooltip || '');
-    });
+    <script type="text/javascript">
+    (function($) {
 
-    // register the setting so GF copies it across all field types
-    fieldSettings['text']            += ', .gftl_tooltip_setting';
-    fieldSettings['textarea']        += ', .gftl_tooltip_setting';
-    fieldSettings['select']          += ', .gftl_tooltip_setting';
-    fieldSettings['multiselect']     += ', .gftl_tooltip_setting';
-    fieldSettings['number']          += ', .gftl_tooltip_setting';
-    fieldSettings['checkbox']        += ', .gftl_tooltip_setting';
-    fieldSettings['radio']           += ', .gftl_tooltip_setting';
-    fieldSettings['name']            += ', .gftl_tooltip_setting';
-    fieldSettings['date']            += ', .gftl_tooltip_setting';
-    fieldSettings['time']            += ', .gftl_tooltip_setting';
-    fieldSettings['phone']           += ', .gftl_tooltip_setting';
-    fieldSettings['address']         += ', .gftl_tooltip_setting';
-    fieldSettings['website']         += ', .gftl_tooltip_setting';
-    fieldSettings['email']           += ', .gftl_tooltip_setting';
-    fieldSettings['fileupload']      += ', .gftl_tooltip_setting';
-    fieldSettings['hidden']          += ', .gftl_tooltip_setting';
-    fieldSettings['html']            += ', .gftl_tooltip_setting';
-    fieldSettings['section']         += ', .gftl_tooltip_setting';
-    fieldSettings['captcha']         += ', .gftl_tooltip_setting';
-    fieldSettings['list']            += ', .gftl_tooltip_setting';
+        var gftlTypes = [
+            'text','textarea','select','multiselect','number','checkbox','radio',
+            'name','date','time','phone','address','website','email','fileupload',
+            'hidden','html','section','captcha','list','post_title','post_body',
+            'post_excerpt','post_tags','post_category','post_image','post_custom_field',
+            'product','quantity','option','total','donation','creditcard','singleproduct',
+            'hiddenproduct','calculation','consent','chainedselect','page'
+        ];
+
+        $(document).ready(function() {
+            $.each(gftlTypes, function(i, type) {
+                if (typeof fieldSettings[type] !== 'undefined') {
+                    fieldSettings[type] += ', .gftl_tooltip_setting';
+                } else {
+                    fieldSettings[type] = '.gftl_tooltip_setting';
+                }
+            });
+        });
+
+        // When a field is selected in the editor, populate the input
+        $(document).on('gform_load_field_settings', function(event, field, form) {
+            var val = (field.gftlTooltip !== undefined && field.gftlTooltip !== null)
+                ? field.gftlTooltip
+                : '';
+            $('#gftl_tooltip_text').val(val);
+
+            // Update the preview for this field immediately when it's selected
+            gftlUpdatePreview(field.id, val);
+        });
+
+        // When the input changes, write back to the field object and update preview.
+        $(document).on('input change', '#gftl_tooltip_text', function() {
+            var val = $(this).val();
+            SetFieldProperty('gftlTooltip', val);
+            gftlUpdatePreview(GetSelectedField().id, val);
+        });
+
+        /**
+         * Insert or remove the tooltip icon in the editor field preview.
+         * The GF editor renders each field inside #field_{id}.
+         */
+        function gftlUpdatePreview(fieldId, tooltipText) {
+            var $fieldRow = $('#field_' + fieldId);
+            if (!$fieldRow.length) return;
+
+            // Remove any existing icon first to avoid duplicates.
+            $fieldRow.find('.gftl-tooltip-wrap').remove();
+
+            if (!tooltipText || tooltipText.trim() === '') return;
+
+            var $label = $fieldRow.find('.gfield_label').first();
+            if (!$label.length) return;
+
+            var $icon = $(
+                '<span class="gftl-tooltip-wrap" role="tooltip" tabindex="0">' +
+                    '<span class="gftl-icon" aria-hidden="true">?</span>' +
+                    '<span class="gftl-bubble"></span>' +
+                '</span>'
+            );
+
+            // Set bubble content as HTML 
+            $icon.find('.gftl-bubble').html(tooltipText);
+            // Set plain-text aria-label for accessibility
+            $icon.attr('aria-label', $('<div>').html(tooltipText).text());
+
+            $label.append($icon);
+        }
+
+        // re-run on gform_load_field_settings in case the editor
+        // re-renders the field preview
+        $(document).on('gform_load_field_settings', function(event, field) {
+            gftlUpdatePreview(field.id, field.gftlTooltip || '');
+        });
+
+    }(jQuery));
     </script>
     <?php
 } );
