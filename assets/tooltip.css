@@ -1,10 +1,11 @@
-/* GF Tooltip Lite */
+/* GF Tooltip Lite  */
 
 .gftl-tooltip-wrap {
     position: relative;
     display: inline-flex;
     align-items: center;
     margin-left: 6px;
+    margin-bottom: 6px;
     vertical-align: middle;
     cursor: default;
 }
@@ -14,13 +15,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background: #0073aa;   /* override in your theme */
+    background: #134063;   /* Dark navy blue */
     color: #fff;
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 500;
     font-style: normal;
     line-height: 1;
     user-select: none;
@@ -32,7 +33,7 @@
     background: #005177;
 }
 
-/* The tooltip bubble */
+/* the tooltip bubble */
 .gftl-bubble {
     visibility: hidden;
     opacity: 0;
@@ -47,7 +48,7 @@
     max-width: 280px;
     padding: 8px 12px;
     border-radius: 4px;
-    background: #1d2327;
+    background: #134063;
     color: #f0f0f0;
     font-size: 13px;
     line-height: 1.5;
@@ -58,6 +59,11 @@
 
     transition: opacity 0.18s ease, transform 0.18s ease;
     transform: translateX(-50%) translateY(4px);
+}
+
+.gtfl-bubble > a {
+    color: #ffffff;
+    text-decoration: underline;
 }
 
 /* Arrow */
